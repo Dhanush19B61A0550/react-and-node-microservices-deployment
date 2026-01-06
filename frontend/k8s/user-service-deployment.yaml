@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox
+        command:
+          - sh
+          - -c
+          - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
+      containers:
+      - name: user-service
+        image: dhanasekhar028/user-service:v4
+        ports:
+        - containerPort: 3003
+        env:
+        - name: DB_HOST
+          value: mysql
+        - name: DB_USER
+          value: micro_user
+        - name: DB_PASSWORD
+          value: micro_pass
+        - name: DB_NAME
+          value: user_db

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox
+        command:
+          - sh
+          - -c
+          - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
+      containers:
+      - name: order-service
+        image: dhanasekhar028/order-service:v9
+        ports:
+        - containerPort: 3002
+        env:
+        - name: DB_HOST
+          value: mysql
+        - name: DB_USER
+          value: micro_user
+        - name: DB_PASSWORD
+          value: micro_pass
+        - name: DB_NAME
+          value: order_db

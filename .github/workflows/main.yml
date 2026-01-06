@@ -1,0 +1,43 @@
+name: Build & Deploy Microservices
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Docker login
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | \
+          docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Build & Push Order Service
+        run: |
+          docker build -t dhanasekhar028/order-service:${{ github.run_number }} ./services/order-service
+          docker push dhanasekhar028/order-service:${{ github.run_number }}
+
+      - name: Build & Push Product Service
+        run: |
+          docker build -t dhanasekhar028/product-service:${{ github.run_number }} ./services/product-service
+          docker push dhanasekhar028/product-service:${{ github.run_number }}
+
+      - name: Build & Push User Service
+        run: |
+          docker build -t dhanasekhar028/user-service:${{ github.run_number }} ./services/user-service
+          docker push dhanasekhar028/user-service:${{ github.run_number }}
+
+      - name: Build & Push Frontend
+        run: |
+          docker build -t dhanasekhar028/frontend:${{ github.run_number }} ./services/frontend
+          docker push dhanasekhar028/frontend:${{ github.run_number }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/

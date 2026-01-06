@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: dhanasekhar028/frontend:v5
+          image: dhanasekhar028/frontend:BUILD_NUM_PLACEHOLDER
           ports:
             - containerPort: 80

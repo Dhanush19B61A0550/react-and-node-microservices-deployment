@@ -21,7 +21,7 @@ spec:
           - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
       - name: order-service
-        image: dhanasekhar028/order-service:v9
+        image: dhanasekhar028/order-service:BUILD_NUM_PLACEHOLDER
         ports:
         - containerPort: 3002
         env:

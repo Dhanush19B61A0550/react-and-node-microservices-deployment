@@ -12,8 +12,10 @@ spec:
       labels:
         app: frontend
     spec:
+      nodeSelector:
+        role: frontend
       containers:
         - name: frontend
-          image: dhanasekhar028/frontend:BUILD_NUM_PLACEHOLDER
+          image: my1acr123.azurecr.io/frontend:3.0
           ports:
             - containerPort: 80

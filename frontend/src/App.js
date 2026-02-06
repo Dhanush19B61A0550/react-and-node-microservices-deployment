@@ -12,9 +12,9 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   // Define ClusterIP service URLs
-  const USER_SERVICE_URL = 'http://127.0.0.1:60065/users';
-  const PRODUCT_SERVICE_URL = 'http://127.0.0.1:60394/products';
-  const ORDER_SERVICE_URL = 'http://127.0.0.1:54102/orders';
+  const USER_SERVICE_URL = 'http://52.238.31.54/users';
+  const PRODUCT_SERVICE_URL = 'http://52.238.31.54/products';
+  const ORDER_SERVICE_URL = 'http://52.238.31.54/orders';
 
   useEffect(() => {
     setLoading(true);

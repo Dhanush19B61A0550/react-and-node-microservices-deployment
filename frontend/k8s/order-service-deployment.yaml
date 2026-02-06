@@ -12,6 +12,8 @@ spec:
       labels:
         app: order-service
     spec:
+      nodeSelector:
+        role: backend
       initContainers:
       - name: wait-for-mysql
         image: busybox
@@ -21,7 +23,7 @@ spec:
           - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
       - name: order-service
-        image: dhanasekhar028/order-service:BUILD_NUM_PLACEHOLDER
+        image: my1acr123.azurecr.io/order-service:2.0 
         ports:
         - containerPort: 3002
         env:

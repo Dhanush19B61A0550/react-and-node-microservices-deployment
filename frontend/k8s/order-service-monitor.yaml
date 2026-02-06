@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: order-service-monitor
+  namespace: monitoring    # ServiceMonitor lives in monitoring namespace
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  namespaceSelector:
+    matchNames:
+      - default           # <-- the namespace where order-service is deployed
+  endpoints:
+    - port: http           # must match port name in the Kubernetes Service
+      path: /metrics
+      interval: 15s

@@ -1,0 +1,33 @@
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: product-service-monitor
+#   labels:
+#     release: monitoring
+# spec:
+#   selector:
+#     matchLabels:
+#       app: product-service
+#   endpoints:
+#     - port: http
+#       path: /metrics
+#       interval: 15s
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: product-service-monitor
+  namespace: monitoring   # Namespace where Prometheus is deployed
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: product-service    # Must match Service labels
+  namespaceSelector:
+    matchNames:
+      - default               # Namespace where product-service Service exists
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

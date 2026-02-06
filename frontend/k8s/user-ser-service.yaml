@@ -3,21 +3,26 @@
 # metadata:
 #   name: user-service
 # spec:
+#   type: ClusterIP
 #   selector:
 #     app: user-service
 #   ports:
-#     - port: 3003
-#       targetPort: 3003
-#   type: ClusterIP
+#     - protocol: TCP
+#       port: 3003        # Internal cluster port
+#       targetPort: 3003  # Container port in the pod
 apiVersion: v1
 kind: Service
 metadata:
   name: user-service
+  namespace: default
+  labels:
+    app: user-service      # must match ServiceMonitor selector
 spec:
+  type: ClusterIP
   selector:
     app: user-service
   ports:
-    - port: 3003        # Service port inside the cluster
-      targetPort: 3003  # Container port
-      nodePort: 31003   # Fixed port on Minikube IP
-  type: NodePort        # Change from ClusterIP to NodePort
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+      name: http

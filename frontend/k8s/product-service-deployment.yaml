@@ -12,6 +12,8 @@ spec:
       labels:
         app: product-service
     spec:
+      nodeSelector:
+        role: backend
       initContainers:
       - name: wait-for-mysql
         image: busybox
@@ -21,7 +23,7 @@ spec:
           - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
       - name: product-service
-        image: dhanasekhar028/product-service:BUILD_NUM_PLACEHOLDER
+        image: my1acr123.azurecr.io/product-service:4.0
         ports:
         - containerPort: 3001
         env:
@@ -33,3 +35,4 @@ spec:
           value: micro_pass
         - name: DB_NAME
           value: product_db
+        

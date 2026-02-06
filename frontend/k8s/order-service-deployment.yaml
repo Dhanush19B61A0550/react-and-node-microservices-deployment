@@ -23,7 +23,7 @@ spec:
           - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
       - name: order-service
-        image: my1acr123.azurecr.io/order-service:2.0 
+        image: my1acr123.azurecr.io/order-service:4.0 
         ports:
         - containerPort: 3002
         env:

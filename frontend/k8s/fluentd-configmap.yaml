@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: logging
+data:
+  fluent.conf: |
+    # ========================
+    # Fluentd Source
+    # ========================
+    <source>
+      @type tail
+      path /var/log/containers/*.log
+      pos_file /var/log/fluentd-containers.pos
+      tag kubernetes.*
+      format cri
+      read_from_head true
+      # Optional: to parse timestamp in container logs
+      time_format %Y-%m-%dT%H:%M:%S.%N%:z
+    </source>
+
+    # ========================
+    # Kubernetes Metadata Filter
+    # ========================
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+      # Automatically add namespace, pod, container info
+      merge_json_log true
+    </filter>
+
+    # ========================
+    # Elasticsearch Output
+    # ========================
+    <match kubernetes.**>
+      @type elasticsearch
+      host "elasticsearch.logging.svc.cluster.local"
+      port 9200
+      logstash_format true
+      logstash_prefix "kubernetes"
+      include_tag_key true
+      type_name "_doc"
+      # Retry and buffer settings to prevent data loss
+      retry_tag_retry_limit 17
+      flush_interval 5s
+      buffer_chunk_limit 2M
+      buffer_queue_limit 8
+      overflow_action block
+    </match>

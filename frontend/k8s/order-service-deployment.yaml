@@ -15,23 +15,35 @@ spec:
       nodeSelector:
         role: backend
       initContainers:
-      - name: wait-for-mysql
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
+        - name: wait-for-mysql
+          image: busybox
+          command:
+            - sh
+            - -c
+            - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
-      - name: order-service
-        image: my1acr123.azurecr.io/order-service:4.0 
-        ports:
-        - containerPort: 3002
-        env:
-        - name: DB_HOST
-          value: mysql
-        - name: DB_USER
-          value: micro_user
-        - name: DB_PASSWORD
-          value: micro_pass
-        - name: DB_NAME
-          value: order_db
+        - name: order-service
+          image: my1acr123.azurecr.io/order-service:9.5
+          ports:
+            - containerPort: 3002
+          env:
+            # ------------------------
+            # Database configuration
+            # ------------------------
+            - name: DB_HOST
+              value: mysql
+            - name: DB_USER
+              value: micro_user
+            - name: DB_PASSWORD
+              value: micro_pass
+            - name: DB_NAME
+              value: order_db
+            # ------------------------
+            # OpenTelemetry / Jaeger
+            # ------------------------
+            - name: SERVICE_NAME
+              value: "order-service"  # Important: this appears in Jaeger
+            - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+              value: "http://jaeger.monitoring.svc.cluster.local:14268/api/traces"
+            - name: OTEL_LOG_LEVEL
+              value: "DEBUG"          # Optional, helpful for debugging

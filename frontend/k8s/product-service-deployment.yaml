@@ -1,3 +1,40 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: product-service
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: product-service
+#   template:
+#     metadata:
+#       labels:
+#         app: product-service
+#     spec:
+#       nodeSelector:
+#         role: backend
+#       initContainers:
+#       - name: wait-for-mysql
+#         image: busybox
+#         command:
+#           - sh
+#           - -c
+#           - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
+#       containers:
+#       - name: product-service
+#         image: my1acr123.azurecr.io/product-service:8.0
+#         ports:
+#         - containerPort: 3001
+#         env:
+#         - name: DB_HOST
+#           value: mysql
+#         - name: DB_USER
+#           value: micro_user
+#         - name: DB_PASSWORD
+#           value: micro_pass
+#         - name: DB_NAME
+#           value: product_db
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,24 +52,35 @@ spec:
       nodeSelector:
         role: backend
       initContainers:
-      - name: wait-for-mysql
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
+        - name: wait-for-mysql
+          image: busybox
+          command:
+            - sh
+            - -c
+            - "until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;"
       containers:
-      - name: product-service
-        image: my1acr123.azurecr.io/product-service:5.0
-        ports:
-        - containerPort: 3001
-        env:
-        - name: DB_HOST
-          value: mysql
-        - name: DB_USER
-          value: micro_user
-        - name: DB_PASSWORD
-          value: micro_pass
-        - name: DB_NAME
-          value: product_db
-        
+        - name: product-service
+          image: my1acr123.azurecr.io/product-service:9.5
+          ports:
+            - containerPort: 3001
+          env:
+            # ------------------------
+            # Database configuration
+            # ------------------------
+            - name: DB_HOST
+              value: mysql
+            - name: DB_USER
+              value: micro_user
+            - name: DB_PASSWORD
+              value: micro_pass
+            - name: DB_NAME
+              value: product_db
+            # ------------------------
+            # OpenTelemetry / Jaeger
+            # ------------------------
+            - name: SERVICE_NAME
+              value: "product-service"  # Important: appears in Jaeger
+            - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+              value: "http://jaeger.monitoring.svc.cluster.local:14268/api/traces"
+            - name: OTEL_LOG_LEVEL
+              value: "DEBUG"            # Optional, helps with debugging

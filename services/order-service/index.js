@@ -135,6 +135,154 @@
 //   console.log(`Order Service running on port ${PORT}`);
 // });
 
+// const express = require('express');
+// const cors = require('cors');
+// const axios = require('axios');
+// const { init, addOrder, getOrders } = require('./db');
+// const client = require('prom-client'); // ✅ Prometheus client
+// const logger = require('./logger'); // ✅ Winston logger
+
+// const app = express();
+
+// /* ------------ Prometheus Metrics Setup ------------ */
+// // Create a Registry
+// const register = new client.Registry();
+
+// // Collect default Node.js metrics (CPU, memory, event loop)
+// client.collectDefaultMetrics({ register });
+
+// // Counter for HTTP requests
+// const httpRequestCounter = new client.Counter({
+//   name: 'http_requests_total',
+//   help: 'Total HTTP requests',
+//   labelNames: ['method', 'route', 'status'],
+// });
+// register.registerMetric(httpRequestCounter);
+
+// // Counter for orders created
+// const ordersCreatedCounter = new client.Counter({
+//   name: 'orders_created_total',
+//   help: 'Total orders created successfully',
+// });
+// register.registerMetric(ordersCreatedCounter);
+
+// // Middleware to count HTTP requests
+// app.use((req, res, next) => {
+//   res.on('finish', () => {
+//     httpRequestCounter.inc({ method: req.method, route: req.path, status: res.statusCode });
+//   });
+//   next();
+// });
+
+// /* ------------ Middleware ------------ */
+// app.use(express.json());
+// app.use(cors()); // enable CORS
+
+// /* ------------ DB Init ------------ */
+// init()
+//   .then(() => logger.info('Order Service DB initialized'))
+//   .catch(err => {
+//     logger.error('DB init failed: ' + err.message);
+//     process.exit(1);
+//   });
+
+// /* ------------ Config ------------ */
+// // Product Service URLs
+// const PRODUCT_SERVICE_INTERNAL = 'http://52.238.31.54/products';
+// const PRODUCT_SERVICE_LOCAL = 'http://127.0.0.1:60394/products';
+// const isKubernetes = process.env.KUBERNETES_SERVICE_HOST !== undefined;
+
+// /* ------------ Routes ------------ */
+
+// // GET all orders
+// app.get('/orders', async (req, res) => {
+//   try {
+//     const orders = await getOrders();
+//     logger.info(`Fetched ${orders.length} orders successfully`);
+//     res.status(200).json(orders);
+//   } catch (err) {
+//     logger.error('GET /orders error: ' + err.message);
+//     res.status(500).json({ error: 'Failed to fetch orders' });
+//   }
+// });
+
+// // POST a new order
+// app.post('/orders', async (req, res) => {
+//   try {
+//     logger.info(`Incoming order payload: ${JSON.stringify(req.body)}`);
+
+//     const { userId, productId } = req.body;
+
+//     if (!userId || !productId) {
+//       logger.error('Failed to create order: userId or productId missing');
+//       return res.status(400).json({ error: 'userId and productId are required' });
+//     }
+
+//     const productServiceURL = isKubernetes ? PRODUCT_SERVICE_INTERNAL : PRODUCT_SERVICE_LOCAL;
+
+//     let productResp;
+//     try {
+//       productResp = await axios.get(productServiceURL, { timeout: 3000 });
+//     } catch (err) {
+//       logger.error('Error fetching products: ' + err.message);
+//       return res.status(502).json({ error: 'Cannot fetch products from Product Service' });
+//     }
+
+//     const product = productResp.data.find(p => p.id === productId);
+//     if (!product) {
+//       logger.error(`Failed to create order: Product not found (productId=${productId})`);
+//       return res.status(400).json({ error: 'Product not found' });
+//     }
+
+//     if (typeof product.price !== 'number' || isNaN(product.price)) {
+//       logger.error(`Failed to create order: Product price invalid (productId=${productId})`);
+//       return res.status(400).json({ error: 'Product price is invalid' });
+//     }
+
+//     const orderData = {
+//       userId,
+//       productId,
+//       productName: product.name,
+//       price: product.price
+//     };
+
+//     const order = await addOrder(orderData);
+
+//     logger.info(`Order created successfully: orderId=${order.id}, userId=${userId}, product=${product.name}, price=${product.price}`);
+
+//     // ✅ Increment orders counter
+//     ordersCreatedCounter.inc();
+
+//     res.status(201).json(order);
+
+//   } catch (err) {
+//     logger.error('POST /orders error: ' + (err.message || err));
+//     res.status(500).json({ error: err.message || 'Failed to place order' });
+//   }
+// });
+
+// /* ------------ Metrics Endpoint ------------ */
+// app.get('/metrics', async (req, res) => {
+//   try {
+//     res.set('Content-Type', register.contentType);
+//     res.end(await register.metrics());
+//   } catch (err) {
+//     logger.error('Error fetching metrics: ' + err.message);
+//     res.status(500).end(err);
+//   }
+// });
+
+// /* ------------ Start Server ------------ */
+// const PORT = 3002;
+// app.listen(PORT, () => {
+//   logger.info(`Order Service running on port ${PORT}`);
+// });
+'use strict';
+
+/* -------------------- OpenTelemetry Setup -------------------- */
+require('./tracing'); // Must be first! Initializes OpenTelemetry tracing
+
+/* -------------------- Imports -------------------- */
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -142,6 +290,7 @@ const { init, addOrder, getOrders } = require('./db');
 const client = require('prom-client'); // ✅ Prometheus client
 const logger = require('./logger'); // ✅ Winston logger
 
+/* -------------------- Express App -------------------- */
 const app = express();
 
 /* ------------ Prometheus Metrics Setup ------------ */

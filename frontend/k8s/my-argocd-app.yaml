@@ -5,16 +5,22 @@ metadata:
   namespace: argocd
 spec:
   project: default
+
   source:
     repoURL: https://github.com/Dhanush19B61A0550/react-and-node-microservices-deployment.git
     targetRevision: main
     path: frontend/k8s
+
   destination:
     server: https://kubernetes.default.svc
     namespace: demo
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
+
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

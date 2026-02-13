@@ -16,6 +16,6 @@ spec:
         role: frontend
       containers:
         - name: frontend
-          image: my1acr123.azurecr.io/frontend:4.0
+          image: my1acr123.azurecr.io/frontend:5.0
           ports:
             - containerPort: 80

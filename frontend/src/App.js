@@ -91,7 +91,7 @@ function App() {
 
   return (
     <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>🛒 Admin Dashboard</h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>🛒 My Admin Dashboard</h1>
 
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
         {/* Left Column: Products & Users */}
